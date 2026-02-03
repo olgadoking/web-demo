@@ -1,10 +1,686 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>My First Website</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nova — Tiny Not-Boring Site</title>
+  <meta name="description" content="A small, modern, not-boring sample website in one HTML file." />
+
+  <style>
+    :root{
+      --bg0:#0b1220;
+      --bg1:#0a2a3a;
+      --card: rgba(255,255,255,.08);
+      --card2: rgba(255,255,255,.12);
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.72);
+      --line: rgba(255,255,255,.14);
+      --shadow: 0 20px 80px rgba(0,0,0,.45);
+
+      --accent:#7c3aed;
+      --accent2:#22c55e;
+      --danger:#ef4444;
+      --warn:#f59e0b;
+
+      --radius: 20px;
+    }
+
+    /* Light mode vars */
+    [data-theme="light"]{
+      --bg0:#f4f7ff;
+      --bg1:#e7f2ff;
+      --card: rgba(0,0,0,.06);
+      --card2: rgba(0,0,0,.08);
+      --text: rgba(0,0,0,.86);
+      --muted: rgba(0,0,0,.62);
+      --line: rgba(0,0,0,.12);
+      --shadow: 0 18px 70px rgba(0,0,0,.12);
+
+      --accent:#6d28d9;
+      --accent2:#16a34a;
+      --danger:#dc2626;
+      --warn:#d97706;
+    }
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text);
+      overflow-x:hidden;
+      background: radial-gradient(1200px 600px at 20% 10%, rgba(124,58,237,.35), transparent 55%),
+                  radial-gradient(900px 500px at 80% 20%, rgba(34,197,94,.25), transparent 55%),
+                  linear-gradient(160deg, var(--bg0), var(--bg1));
+    }
+
+    /* Animated “aurora” layer */
+    .aurora{
+      position:fixed; inset:-40%;
+      background:
+        radial-gradient(circle at 30% 30%, rgba(124,58,237,.35), transparent 45%),
+        radial-gradient(circle at 70% 40%, rgba(34,197,94,.28), transparent 45%),
+        radial-gradient(circle at 55% 70%, rgba(59,130,246,.20), transparent 45%);
+      filter: blur(40px) saturate(120%);
+      opacity:.9;
+      animation: drift 16s ease-in-out infinite alternate;
+      pointer-events:none;
+      z-index:-1;
+    }
+    @keyframes drift{
+      from{ transform: translate3d(-2%, -1%, 0) scale(1.02) rotate(-1deg); }
+      to{ transform: translate3d(2%, 1%, 0) scale(1.06) rotate(1deg); }
+    }
+
+    .wrap{
+      max-width: 1050px;
+      margin: 0 auto;
+      padding: 28px 18px 60px;
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      margin-bottom: 18px;
+    }
+
+    .brand{
+      display:flex; align-items:center; gap:12px;
+      user-select:none;
+    }
+
+    .logo{
+      width:44px; height:44px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent), #3b82f6, var(--accent2));
+      box-shadow: 0 12px 40px rgba(124,58,237,.25);
+      position:relative;
+      overflow:hidden;
+    }
+    .logo::after{
+      content:"";
+      position:absolute; inset:-30%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 45%);
+      transform: rotate(25deg);
+      opacity:.7;
+    }
+
+    .brand h1{
+      font-size: 18px;
+      margin:0;
+      letter-spacing:.3px;
+    }
+    .brand p{
+      margin:2px 0 0;
+      font-size: 12px;
+      color:var(--muted);
+    }
+
+    .top-actions{
+      display:flex; align-items:center; gap:10px;
+    }
+
+    .btn{
+      appearance:none; border:1px solid var(--line);
+      background: var(--card);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-weight: 600;
+      cursor:pointer;
+      transition: transform .15s ease, background .15s ease, border-color .15s ease;
+      backdrop-filter: blur(14px);
+    }
+    .btn:hover{ transform: translateY(-1px); background: var(--card2); border-color: rgba(255,255,255,.22); }
+    [data-theme="light"] .btn:hover{ border-color: rgba(0,0,0,.18); }
+
+    .btn.primary{
+      border-color: rgba(124,58,237,.45);
+      background: linear-gradient(135deg, rgba(124,58,237,.35), rgba(34,197,94,.20));
+    }
+    .btn.primary:hover{ border-color: rgba(124,58,237,.65); }
+
+    .grid{
+      display:grid;
+      grid-template-columns: 1.3fr .9fr;
+      gap: 16px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 900px){
+      .grid{ grid-template-columns: 1fr; }
+    }
+
+    .card{
+      border:1px solid var(--line);
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background: radial-gradient(700px 280px at 20% 0%, rgba(124,58,237,.22), transparent 60%);
+      opacity:.8;
+      pointer-events:none;
+    }
+
+    .hero{
+      padding: 22px 22px 18px;
+    }
+
+    .hero h2{
+      margin:0 0 8px;
+      font-size: clamp(24px, 3.4vw, 36px);
+      letter-spacing:-.6px;
+      line-height:1.1;
+    }
+    .hero p{
+      margin:0;
+      color:var(--muted);
+      line-height:1.6;
+      max-width: 62ch;
+    }
+
+    .pillbar{
+      margin-top: 16px;
+      display:flex; flex-wrap:wrap; gap:10px;
+    }
+    .pill{
+      padding: 8px 10px;
+      border-radius: 999px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      font-size: 12px;
+      color: var(--muted);
+    }
+    [data-theme="light"] .pill{ background: rgba(0,0,0,.04); }
+
+    .row{
+      display:flex; gap:10px; flex-wrap:wrap;
+      margin-top: 18px;
+      align-items:center;
+    }
+
+    .progress{
+      width: 260px;
+      max-width: 100%;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      border:1px solid var(--line);
+      overflow:hidden;
+    }
+    [data-theme="light"] .progress{ background: rgba(0,0,0,.06); }
+    .bar{
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #3b82f6, var(--accent2));
+      border-radius: 999px;
+      transition: width .25s ease;
+    }
+
+    .meta{
+      display:flex;
+      align-items:center;
+      gap: 12px;
+      color:var(--muted);
+      font-size: 12px;
+    }
+
+    /* To-do list */
+    .todo-head{
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+      gap:10px;
+      margin-bottom: 12px;
+    }
+    .todo-head h3{ margin:0; font-size: 16px; }
+    .todo-head span{ color:var(--muted); font-size: 12px; }
+
+    .todo-form{
+      display:flex;
+      gap:10px;
+      margin-top: 10px;
+    }
+    .input{
+      flex:1;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 12px;
+      outline:none;
+    }
+    [data-theme="light"] .input{ background: rgba(0,0,0,.04); }
+
+    .list{
+      margin-top: 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 8px;
+    }
+    .item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 10px;
+      border:1px solid var(--line);
+      background: rgba(255,255,255,.06);
+      border-radius: 14px;
+      padding: 10px 12px;
+      animation: pop .22s ease;
+    }
+    [data-theme="light"] .item{ background: rgba(0,0,0,.04); }
+
+    @keyframes pop{
+      from{ transform: translateY(6px); opacity:0; }
+      to{ transform: translateY(0); opacity:1; }
+    }
+
+    .left{
+      display:flex; align-items:center; gap:10px;
+      min-width: 0;
+    }
+
+    .check{
+      width: 18px; height: 18px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: transparent;
+      display:grid; place-items:center;
+      cursor:pointer;
+      flex: 0 0 auto;
+    }
+    .check svg{ width: 14px; height: 14px; opacity:0; transform: scale(.85); transition: .15s ease; }
+    .item.done .check{
+      background: rgba(34,197,94,.18);
+      border-color: rgba(34,197,94,.35);
+    }
+    .item.done .check svg{ opacity:1; transform: scale(1); }
+
+    .text{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      max-width: 100%;
+    }
+    .item.done .text{
+      text-decoration: line-through;
+      opacity:.6;
+    }
+
+    .tiny{
+      display:flex; gap:8px; align-items:center;
+    }
+    .iconbtn{
+      border:1px solid var(--line);
+      background: transparent;
+      color: var(--muted);
+      border-radius: 12px;
+      padding: 8px 10px;
+      cursor:pointer;
+      transition: .15s ease;
+    }
+    .iconbtn:hover{
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      transform: translateY(-1px);
+    }
+    [data-theme="light"] .iconbtn:hover{ background: rgba(0,0,0,.06); }
+
+    /* Toast */
+    .toast-wrap{
+      position: fixed;
+      right: 16px;
+      bottom: 16px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      z-index: 50;
+      pointer-events:none;
+    }
+    .toast{
+      pointer-events:auto;
+      border:1px solid var(--line);
+      background: rgba(0,0,0,.35);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 14px;
+      min-width: 260px;
+      max-width: 360px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      backdrop-filter: blur(16px);
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      animation: slideIn .22s ease;
+    }
+    [data-theme="light"] .toast{ background: rgba(255,255,255,.70); }
+
+    @keyframes slideIn{
+      from{ transform: translateX(18px); opacity:0; }
+      to{ transform: translateX(0); opacity:1; }
+    }
+
+    .dot{
+      width:10px; height:10px;
+      border-radius: 999px;
+      margin-top: 4px;
+      background: var(--accent2);
+      flex: 0 0 auto;
+    }
+    .toast.warn .dot{ background: var(--warn); }
+    .toast.bad .dot{ background: var(--danger); }
+
+    .toast h4{
+      margin:0 0 2px;
+      font-size: 13px;
+    }
+    .toast p{
+      margin:0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height:1.35;
+    }
+
+    footer{
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align:center;
+      opacity:.85;
+    }
+    a{ color: inherit; }
+  </style>
 </head>
+
 <body>
-  <h1>Hello, Web!</h1>
-  <p>This site is live.</p>
+  <div class="aurora" aria-hidden="true"></div>
+
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <h1>Nova</h1>
+          <p>One-file sample site • glass UI • tiny interactions</p>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="btn" id="themeBtn" type="button" title="Toggle theme">🌙 / ☀️</button>
+        <button class="btn primary" id="boostBtn" type="button">Run Demo</button>
+      </div>
+    </header>
+
+    <main class="grid">
+      <section class="card hero">
+        <h2>Not-boring HTML, no frameworks, no excuses.</h2>
+        <p>
+          This page is intentionally “small but spicy”: a glassy layout, a progress demo,
+          toasts, and a to-do list that saves to your browser.
+          It’s the kind of sample students can actually build from — without drowning in libraries.
+        </p>
+
+        <div class="pillbar">
+          <div class="pill">Client–side only</div>
+          <div class="pill">localStorage</div>
+          <div class="pill">Responsive grid</div>
+          <div class="pill">Micro-animations</div>
+          <div class="pill">Dark/Light mode</div>
+        </div>
+
+        <div class="row">
+          <div class="progress" aria-label="Demo progress bar">
+            <div class="bar" id="bar"></div>
+          </div>
+          <div class="meta">
+            <span id="status">Ready.</span>
+            <span>•</span>
+            <span id="pct">0%</span>
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="btn" id="toastBtn" type="button">Show Toast</button>
+          <button class="btn" id="clearBtn" type="button">Reset Progress</button>
+        </div>
+      </section>
+
+      <aside class="card">
+        <div class="todo-head">
+          <div>
+            <h3>Today’s tiny mission</h3>
+            <span id="count">0 items</span>
+          </div>
+          <button class="iconbtn" id="wipeBtn" type="button" title="Clear all">🧹</button>
+        </div>
+
+        <form class="todo-form" id="todoForm">
+          <input class="input" id="todoInput" placeholder="Add a task (e.g., 'Upload index.html')" maxlength="80" />
+          <button class="btn primary" type="submit">Add</button>
+        </form>
+
+        <div class="list" id="list"></div>
+      </aside>
+    </main>
+
+    <footer>
+      Built with old-school HTML/CSS/JS — because sometimes the classics still slap.
+    </footer>
+  </div>
+
+  <div class="toast-wrap" id="toasts" aria-live="polite" aria-atomic="true"></div>
+
+  <script>
+    // --- Theme ---
+    const root = document.documentElement;
+    const themeBtn = document.getElementById("themeBtn");
+
+    function setTheme(theme){
+      root.setAttribute("data-theme", theme);
+      localStorage.setItem("theme", theme);
+    }
+    const savedTheme = localStorage.getItem("theme");
+    if(savedTheme) setTheme(savedTheme);
+
+    themeBtn.addEventListener("click", () => {
+      const cur = root.getAttribute("data-theme") || "dark";
+      setTheme(cur === "dark" ? "light" : "dark");
+      toast("Theme switched", `Now using ${root.getAttribute("data-theme")} mode.`, "ok");
+    });
+
+    // --- Toasts ---
+    const toastWrap = document.getElementById("toasts");
+    function toast(title, msg, type="ok"){
+      const el = document.createElement("div");
+      el.className = `toast ${type === "warn" ? "warn" : type === "bad" ? "bad" : ""}`;
+      el.innerHTML = `
+        <div class="dot" aria-hidden="true"></div>
+        <div>
+          <h4>${escapeHtml(title)}</h4>
+          <p>${escapeHtml(msg)}</p>
+        </div>
+      `;
+      toastWrap.appendChild(el);
+
+      const ttl = type === "bad" ? 4800 : 3600;
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateX(18px)";
+        el.style.transition = "all .2s ease";
+        setTimeout(() => el.remove(), 220);
+      }, ttl);
+    }
+
+    function escapeHtml(s){
+      return String(s).replace(/[&<>"']/g, c => ({
+        "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+      }[c]));
+    }
+
+    document.getElementById("toastBtn").addEventListener("click", () => {
+      toast("Ping!", "This is your friendly little toast notification.", "ok");
+    });
+
+    // --- Progress demo ---
+    const bar = document.getElementById("bar");
+    const statusEl = document.getElementById("status");
+    const pctEl = document.getElementById("pct");
+    const clearBtn = document.getElementById("clearBtn");
+    const boostBtn = document.getElementById("boostBtn");
+
+    let timer = null;
+    let pct = 0;
+
+    function setProgress(n){
+      pct = Math.max(0, Math.min(100, n));
+      bar.style.width = pct + "%";
+      pctEl.textContent = pct + "%";
+      if(pct === 0) statusEl.textContent = "Ready.";
+      if(pct === 100) statusEl.textContent = "Done. Ship it. 🚀";
+    }
+
+    function runDemo(){
+      if(timer) return toast("Already running", "Let it cook for a sec.", "warn");
+      toast("Demo started", "Progress bar will auto-fill.", "ok");
+      statusEl.textContent = "Warming up…";
+      timer = setInterval(() => {
+        const bump = Math.floor(Math.random() * 9) + 3; // 3..11
+        setProgress(pct + bump);
+
+        if(pct > 20 && pct < 55) statusEl.textContent = "Building vibes…";
+        if(pct >= 55 && pct < 90) statusEl.textContent = "Almost there…";
+        if(pct >= 90 && pct < 100) statusEl.textContent = "Final touches…";
+
+        if(pct >= 100){
+          clearInterval(timer);
+          timer = null;
+          toast("All set", "Demo completed successfully.", "ok");
+        }
+      }, 420);
+    }
+
+    boostBtn.addEventListener("click", runDemo);
+    clearBtn.addEventListener("click", () => {
+      if(timer){ clearInterval(timer); timer = null; }
+      setProgress(0);
+      toast("Reset", "Progress reset to 0%.", "ok");
+    });
+
+    // --- Tiny To-do (localStorage) ---
+    const KEY = "nova.todos.v1";
+    const list = document.getElementById("list");
+    const count = document.getElementById("count");
+    const form = document.getElementById("todoForm");
+    const input = document.getElementById("todoInput");
+    const wipeBtn = document.getElementById("wipeBtn");
+
+    let todos = load();
+
+    function load(){
+      try{
+        return JSON.parse(localStorage.getItem(KEY)) || [];
+      }catch{
+        return [];
+      }
+    }
+
+    function save(){
+      localStorage.setItem(KEY, JSON.stringify(todos));
+      render();
+    }
+
+    function render(){
+      list.innerHTML = "";
+      const total = todos.length;
+      count.textContent = total === 1 ? "1 item" : `${total} items`;
+
+      if(total === 0){
+        const empty = document.createElement("div");
+        empty.className = "item";
+        empty.innerHTML = `
+          <div class="left">
+            <div class="check" aria-hidden="true"></div>
+            <div class="text">No tasks yet. Add one and pretend it’s productivity.</div>
+          </div>
+          <div class="tiny"><span style="color:var(--muted);font-size:12px;">✨</span></div>
+        `;
+        list.appendChild(empty);
+        return;
+      }
+
+      todos.forEach((t, idx) => {
+        const item = document.createElement("div");
+        item.className = "item" + (t.done ? " done" : "");
+        item.innerHTML = `
+          <div class="left">
+            <button class="check" type="button" aria-label="Toggle done">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 6L9 17l-5-5"></path>
+              </svg>
+            </button>
+            <div class="text" title="${escapeHtml(t.text)}">${escapeHtml(t.text)}</div>
+          </div>
+
+          <div class="tiny">
+            <button class="iconbtn" type="button" title="Delete">🗑️</button>
+          </div>
+        `;
+
+        const toggleBtn = item.querySelector(".check");
+        const delBtn = item.querySelector(".iconbtn");
+
+        toggleBtn.addEventListener("click", () => {
+          todos[idx].done = !todos[idx].done;
+          save();
+          toast("Updated", todos[idx].done ? "Marked done." : "Marked not done.", "ok");
+        });
+
+        delBtn.addEventListener("click", () => {
+          const gone = todos[idx].text;
+          todos.splice(idx, 1);
+          save();
+          toast("Deleted", `Removed: ${gone}`, "warn");
+        });
+
+        list.appendChild(item);
+      });
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if(!text) return toast("Nope", "Type something first 😭", "bad");
+
+      todos.unshift({ text, done:false, at: Date.now() });
+      input.value = "";
+      save();
+      toast("Added", "Task added to your list.", "ok");
+    });
+
+    wipeBtn.addEventListener("click", () => {
+      if(todos.length === 0) return toast("Nothing to clear", "Your list is already empty.", "warn");
+      todos = [];
+      save();
+      toast("Cleared", "All tasks removed.", "warn");
+    });
+
+    // Init
+    setProgress(0);
+    render();
+
+    // Little welcome toast
+    setTimeout(() => toast("Welcome", "Try adding a task or run the demo.", "ok"), 600);
+  </script>
 </body>
 </html>
